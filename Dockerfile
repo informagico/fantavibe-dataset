@@ -5,11 +5,10 @@ RUN apt-get update && apt-get install -y curl git build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PATH="/root/.local/bin:$PATH"
+WORKDIR /app
 
-WORKDIR /app
-RUN git clone https://github.com/AndreaBozzo/fantacalcio-py.git .
-WORKDIR /app
+COPY . /app
 
 RUN poetry install --no-interaction --no-ansi
-COPY upload_to_github.py /app/upload_to_github.py
-CMD poetry run python cli.py run && poetry run python upload_to_github.py
+
+CMD poetry run python cli.py run && poetry run python publish_release.py
