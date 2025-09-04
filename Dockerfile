@@ -11,6 +11,5 @@ RUN git clone https://github.com/AndreaBozzo/fantacalcio-py.git .
 WORKDIR /app
 
 RUN poetry install --no-interaction --no-ansi
-RUN poetry install --no-interaction --no-ansi
 COPY upload_to_github.py /app/upload_to_github.py
 CMD poetry run python cli.py run && poetry run python upload_to_github.py
