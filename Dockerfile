@@ -5,6 +5,8 @@ RUN apt-get update && apt-get install -y curl git build-essential \
     && curl -sSL https://install.python-poetry.org | python3 - \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip install requests
+
 ENV PATH="/root/.local/bin:$PATH"
 
 # Remove any existing app directory
