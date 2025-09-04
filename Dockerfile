@@ -22,4 +22,4 @@ WORKDIR /app
 RUN poetry install --no-interaction --no-ansi
 
 # Run the desired commands
-CMD bash -c "poetry run python cli.py run && python publish_release.py"
+CMD bash -c "poetry run python cli.py run --source fpedia --force-scrape && python publish_release.py"
