@@ -19,4 +19,5 @@ WORKDIR /app
 RUN poetry install --no-interaction --no-ansi
 
 # Run the desired commands
-CMD poetry run python cli.py run && poetry run python publish_release.py
+CMD poetry run python cli.py run
+CMD python publish_release.py
