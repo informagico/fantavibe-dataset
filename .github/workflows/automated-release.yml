@@ -69,24 +69,13 @@ jobs:
       id: tag
       run: echo "TAG=$(date -u +'%Y.%m.%d')" >> $GITHUB_OUTPUT
     
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
+    - name: Create GitHub Release and Upload Asset
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.tag.outputs.TAG }}
-        release_name: Automated release ${{ steps.tag.outputs.TAG }}
-        body: Generated automatically from GitHub Actions workflow.
-        draft: false
-        prerelease: false
-    
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.find_file.outputs.FILE_PATH }}
-        asset_name: ${{ steps.find_file.outputs.ASSET_NAME }}
-        asset_content_type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      run: |
+        # Create release and upload asset in one step using GitHub CLI
+        gh release create "${{ steps.tag.outputs.TAG }}" \
+          --title "Automated release ${{ steps.tag.outputs.TAG }}" \
+          --notes "Generated automatically from GitHub Actions workflow." \
+          --repo ${{ github.repository }} \
+          "${{ steps.find_file.outputs.FILE_PATH }}#${{ steps.find_file.outputs.ASSET_NAME }}"
