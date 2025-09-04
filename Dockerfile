@@ -5,10 +5,6 @@ RUN apt-get update && apt-get install -y curl git build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PATH="/root/.local/bin:$PATH"
-WORKDIR /app
-
-COPY . /app
 
 RUN poetry install --no-interaction --no-ansi
-
 CMD poetry run python cli.py run && poetry run python publish_release.py
