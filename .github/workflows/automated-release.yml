@@ -38,7 +38,7 @@ jobs:
     
     - name: Clone fantacalcio-py repository
       run: |
-        git clone https://github.com/AndreaBozzo/fantacalcio-py.git fantacalcio
+        git clone https://github.com/piopy/fantacalcio-py.git fantacalcio
         cd fantacalcio
         echo "Current directory: $(pwd)"
         echo "Files in directory:"
