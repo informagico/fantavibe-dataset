@@ -4,9 +4,8 @@ import requests
 GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 REPO = os.environ["GITHUB_REPO"]
 FILE_PATH = os.environ["FILE_PATH"]
-TAG = "auto-release"
+TAG = datetime.utcnow().strftime("%Y.%m.%d")
 
-# 1. Crea una nuova release
 release_url = f"https://api.github.com/repos/{REPO}/releases"
 headers = {"Authorization": f"token {GITHUB_TOKEN}"}
 payload = {
