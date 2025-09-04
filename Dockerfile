@@ -13,6 +13,7 @@ RUN rm -rf /app
 # Clone the repository into /app
 RUN git clone https://github.com/AndreaBozzo/fantacalcio-py.git /app
 
+COPY . /app
 WORKDIR /app
 
 # Install dependencies with Poetry
