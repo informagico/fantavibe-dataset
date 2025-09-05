@@ -16,10 +16,15 @@ permissions:
   contents: write
   
 jobs:
-  generate-and-release:
+  generate-and-push:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for all branches
+    
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -65,17 +70,49 @@ jobs:
         echo "FILE_PATH=$FULL_PATH" >> $GITHUB_OUTPUT
         echo "ASSET_NAME=$(basename $FILE_PATH)" >> $GITHUB_OUTPUT
     
-    - name: Generate release tag
-      id: tag
-      run: echo "TAG=$(date -u +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+    - name: Generate timestamp
+      id: timestamp
+      run: echo "TIMESTAMP=$(date -u +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
     
-    - name: Create GitHub Release and Upload Asset
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Setup release branch and commit file
       run: |
-        # Create release and upload asset in one step using GitHub CLI
-        gh release create "${{ steps.tag.outputs.TAG }}" \
-          --title "Automated release ${{ steps.tag.outputs.TAG }}" \
-          --notes "Generated automatically from GitHub Actions workflow." \
-          --repo ${{ github.repository }} \
-          "${{ steps.find_file.outputs.FILE_PATH }}#${{ steps.find_file.outputs.ASSET_NAME }}"
+        # Configure git
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        
+        # Check if release branch exists
+        if git show-ref --verify --quiet refs/remotes/origin/release; then
+          echo "Release branch exists, checking out..."
+          git checkout -b release origin/release
+        else
+          echo "Creating new release branch..."
+          git checkout -b release
+        fi
+        
+        # Copy the generated file to the repository root with timestamped name
+        NEW_FILENAME="${{ steps.timestamp.outputs.TIMESTAMP }}_${{ steps.find_file.outputs.ASSET_NAME }}"
+        cp "${{ steps.find_file.outputs.FILE_PATH }}" "./$NEW_FILENAME"
+        
+        # Also create/update a "latest" version for easy access
+        cp "${{ steps.find_file.outputs.FILE_PATH }}" "./latest_${{ steps.find_file.outputs.ASSET_NAME }}"
+        
+        # Add files to git
+        git add "$NEW_FILENAME"
+        git add "latest_${{ steps.find_file.outputs.ASSET_NAME }}"
+        
+        # Check if there are changes to commit
+        if git diff --cached --quiet; then
+          echo "No changes to commit"
+        else
+          # Commit the changes
+          git commit -m "Automated release: ${{ steps.timestamp.outputs.TIMESTAMP }}
+          
+          Generated from fantacalcio-py source: fpedia
+          Workflow run: ${{ github.run_id }}
+          Trigger: ${{ github.event_name }}"
+          
+          # Push to release branch
+          git push origin release
+          
+          echo "Successfully pushed to release branch"
+        fi
